@@ -40,13 +40,14 @@ class batches():
                 self.x_test, self.y_test, self.d_test = self.load_data(f)
 
     def load_data(self,file):
+        print(file)
         X = []
         with open(file,"r") as f:
             lines = f.readlines()
             for l,line in enumerate(lines):
-                blocks = line.strip(" :\n").split(";")
+                blocks = line.strip(",:\n").split(",;")
                 X.append([blocks[0].strip().split(":"),blocks[1].strip().split(":")])
-        X = [[[(np.asarray(X[i][j][k].split()).astype(np.float32)/255)\
+        X = [[[(np.asarray(X[i][j][k].strip(",").split(",")).astype(np.float32)/255)\
                                     for k in range(len(X[i][j])) if len(X[i][j][k])>0]\
                                     for j in range(len(X[i]))]\
                                     for i in range(len(X))]
@@ -126,10 +127,12 @@ pairs_sets = []
 labels_sets = []
 
 for x,y in zip(x_sets,y_sets):
+    i = 0
     for xi,yi in zip(x,y):
         if i == 0:
             pairs = xi.reshape(-1,2,136,80)
             labels = yi
+            i+=1
         else:
             pairs = np.append(pairs,xi.reshape(-1,2,136,80),axis=0)
             labels = np.append(labels, yi)
