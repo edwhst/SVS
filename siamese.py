@@ -115,16 +115,29 @@ def similarity(sh,feature_model):
     similarity_model.summary()
     return similarity_model
 
-prueba = ["traingset.txt","traingset.txt"]
-dp = batches(prueba)
+
+datasets = ["traingset.txt","test_questioned.txt"]
+dp = batches(datasets)
 dp.sets()
-for i,x in enumerate(dp.x_train):
-    if i == 0:
-        ptr = x.reshape(-1,2,136,80)
-        ytr = dp.y_train[i]
-    else:
-        ptr = np.append(ptr,x.reshape(-1,2,136,80),axis=0)
-        ytr = np.append(ytr, dp.y_train[i])
+
+x_sets = [dp.x_train,dp.x_test]
+y_sets = [dp.y_train,dp.y_test]
+pairs_sets = []
+labels_sets = []
+
+for x,y in zip(x_sets,y_sets):
+    for xi,yi in zip(x,y):
+        if i == 0:
+            pairs = xi.reshape(-1,2,136,80)
+            labels = yi
+        else:
+            pairs = np.append(pairs,xi.reshape(-1,2,136,80),axis=0)
+            labels = np.append(labels, yi)
+    print(pairs.shape,labels.shape)
+    pairs_sets.append(pairs)
+    labels_sets.append(labels)
+print(len(pairs_sets),len(labels_sets))
+exit()
 
 ##Image verification
 #print(ptr[0,0].shape)
