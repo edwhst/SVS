@@ -6,6 +6,7 @@ from keras.models import Model
 from keras.layers import Input, Conv2D, BatchNormalization, MaxPool2D, Activation, Flatten, Dense, Dropout
 from keras.layers import concatenate
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 
 class EarlyStopping_byvalue(callbacks.Callback):
      def __init__(self,monitor='val_mean_absolute_error',value=0.1,verbose=0):
@@ -148,23 +149,46 @@ exit()
 #plt.imshow(np.transpose(ptr[0,0]),cmap='gray')
 #plt.show()
 #exit()
+"""1st approach: Mix datasets and randomely split for traning, validation and testing"""
+full_set_pairs = np.append(pairs_sets[0],pairs_sets[1],axis=0)
+full_set_labels = np.append(labels_sets[0],labels_sets[1],axis=0)
+idx = np.arange(full_set_labels.shape[0])
+np.random.shuffle(idx)
+trn1 = idx[:((int)(full_set_pairs[0]*0.6))] #60% training
+val1 = idx[((int)(full_set_pairs[0]*0.6)):((int)(full_set_pairs[0]*0.8))] #20% validation
+tst1 = idx[((int)(full_set_pairs[0]*0.8)):] #20% testing
 
-"""shuffle data and split training and validaton"""
-rdm_index = np.arange(ptr.shape[0])
-np.random.shuffle(rdm_index)
-tr = rdm_index[:((int)(ptr.shape[0]*0.7))]
-val = rdm_index[((int)(ptr.shape[0]*0.7)):]
-
-feature_model = covnet_features(ptr[0,0,0:].shape)
-sim_model = similarity(ptr[0,0,0:].shape,feature_model)
+feature_model = covnet_features(full_set_pairs[0,0,0:].shape)
+sim_model = similarity(full_set_pairs[0,0,0:].shape,feature_model)
 sim_model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
-loss = sim_model.fit([ptr[tr,0],ptr[tr,1]],ytr[tr],
+loss = sim_model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set_labels[trn1],
                     callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.01, verbose=1)],
                     epochs = 50,
                     batch_size = 100,
-                    validation_data = ([ptr[val,0],ptr[val,1]],ytr[val]),
+                    validation_data = ([full_set_pairs[val1,0],full_set_pairs[val1,1]],full_set_labels[val1]),
                     verbose = True)
+
+print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(full_set_labels[tst1],sim_model.predict([full_set_pairs[tst1,0],full_set_pairs[tst1,1]]))))
+
+"""2nd approach: Testing with test dataset"""
+idx2 = np.arange(ptr.shape[0])
+np.random.shuffle(idx2)
+trn2 = idx2[:((int)(pairs_sets[0].shape[0]*0.7))]   # 70% training
+val2 = idx2[((int)(pairs_sets[0].shape[0]*0.7)):]   # 30% validation
+
+feature_model = covnet_features(pairs_sets[0][0,0,0:].shape)
+sim_model = similarity(pairs_sets[0][0,0,0:].shape,feature_model)
+sim_model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+
+loss = sim_model.fit([pairs_sets[0][trn2,0],pairs_sets[0][trn2,1]],labels_sets[0][trn2],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.01, verbose=1)],
+                    epochs = 50,
+                    batch_size = 100,
+                    validation_data = ([pairs_sets[0][val2,0],pairs_sets[0][val2,1]],labels_sets[0][val2]),
+                    verbose = True)
+
+print("Accuracy with independent testing set: {0:2.4f}".format(accuracy_score(labels_sets[1],sim_model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]]))))
 
 
 
