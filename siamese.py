@@ -7,6 +7,8 @@ from keras.layers import Input, Conv2D, BatchNormalization, MaxPool2D, Activatio
 from keras.layers import concatenate
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
 
 class LossHistory(callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -255,7 +257,7 @@ loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([full_set_pairs[val1,0],full_set_pairs[val1,1]],full_set_labels[val1]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(full_set_labels[tst1],np.where(model1.model.predict([full_set_pairs[tst1,0],full_set_pairs[tst1,1]])>0.9,1,0))))
 
@@ -276,7 +278,7 @@ loss = model2.model.fit([pairs_sets[0][trn2,0],pairs_sets[0][trn2,1]],labels_set
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([pairs_sets[0][val2,0],pairs_sets[0][val2,1]],labels_sets[0][val2]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with independent test set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model2.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
 
@@ -314,7 +316,7 @@ loss = model3.model.fit([x_train[trn3,0],x_train[trn3,1]],y_train[trn3],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([x_train[val3,0],x_train[val3,1]],y_train[val3]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with independent test set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model3.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
 
@@ -430,11 +432,11 @@ model4.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history4 = LossHistory()
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history4],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history4],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0))))
 
@@ -452,11 +454,11 @@ model5.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history5 = LossHistory()
 
 loss = model5.model.fit(dp2.x_train[trn5],dp2.y_train[trn5],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history5],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history5],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val5],dp2.y_train[val5]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with independent testing set: {0:2.4f}".format(accuracy_score(dp2.y_test,np.where(model5.model.predict(dp2.x_test)>0.9,1,0))))
 
@@ -489,10 +491,58 @@ model6.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history6 = LossHistory()
 
 loss = model6.model.fit(dp2.x_train[trn6],dp2.y_train[trn6],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history6],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history6],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with independent test set : {0:2.4f}".format(accuracy_score(dp2.y_test,np.where(model6.model.predict(dp2.x_test)>0.9,1,0))))
+
+
+"""SVM Individual signatures classification """
+
+class svm_covnet():
+    def __init__(self,sh):
+        self.sh = sh
+
+    def create(self):
+        self.model = self.covnet_features(self.sh)
+
+    def covnet_features(self,sh):
+        img_in = Input(shape = sh, name = 'FeatureNet_ImageInput')
+        n_layer = img_in
+        for i in range(2):
+            n_layer = Conv2D(8*2**i, kernel_size = (1,1), activation = 'linear')(n_layer)
+            n_layer = BatchNormalization()(n_layer)
+            n_layer = Activation('relu')(n_layer)
+            n_layer = Conv2D(16*2**i, kernel_size = (1,1), activation = 'linear')(n_layer)
+            n_layer = BatchNormalization()(n_layer)
+            n_layer = Activation('relu')(n_layer)
+            n_layer = MaxPool2D((2,2))(n_layer)
+        n_layer = Flatten()(n_layer)
+        n_layer = Dense(32, activation = 'linear')(n_layer)
+        #n_layer = Dropout(0.5)(n_layer)
+        n_layer = BatchNormalization()(n_layer)
+        n_layer = Activation('relu')(n_layer)
+        feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
+        #feature_model.summary()
+        return self.svm_pipeline(feature_model)
+
+    def svm_pipeline(self,feature_model):
+        clf = SVC()
+        pipe = Pipeline(steps=[('covnet',feature_model),('svm'),clf])
+        return pipe
+
+idx7 = np.arange(x_all.shape[0])
+np.random.shuffle(idx7)
+trn7 = idx7[:((int)(x_all.shape[0]*0.8))] #80% training
+tst7 = idx7[((int)(x_all.shape[0]*0.8)):] #20% testing
+
+model7 = svm_covnet(x_all.reshape(-1,136,80,1)[0].shape)
+model7.create()
+model7.model.fit(x_all[trn7],y_all[trn7])
+
+print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(x_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,0))))
+
+
