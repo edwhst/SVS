@@ -7,6 +7,7 @@ from keras.layers import Input, Conv2D, BatchNormalization, MaxPool2D, Activatio
 from keras.layers import concatenate
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
+from sklearn.svm import SVC
 
 class LossHistory(callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -33,6 +34,8 @@ class EarlyStopping_byvalue(callbacks.Callback):
                     print("Early stopping at epoch %02d" % epoch)
                     self.model.stop_training = True
 
+
+"""Siamese network pairs signatures classification"""
 
 class batches():
     def __init__(self,files):
@@ -182,7 +185,7 @@ class siamese_covnet():
         n_layer = BatchNormalization()(n_layer)
         n_layer = Activation('relu')(n_layer)
         feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
-        feature_model.summary()
+        #feature_model.summary()
         return self.similarity(self.sh,feature_model)
 
     def similarity(self,sh,feature_model):
@@ -199,7 +202,7 @@ class siamese_covnet():
         combined_features = Activation('relu')(combined_features)
         combined_features = Dense(1, activation = 'sigmoid')(combined_features)
         similarity_model = Model(inputs = [img_a_in, img_b_in], outputs = [combined_features], name = 'Similarity_Model')
-        similarity_model.summary()
+        #similarity_model.summary()
         return similarity_model
 
 
@@ -232,7 +235,7 @@ for x,y in zip(x_sets,y_sets):
 #plt.show()
 #exit()
 
-"""1st approach: Mix datasets and randomely split for traning, validation and testing"""
+"""Siamese+covnet 1st approach: Mix datasets and randomely split for traning, validation and testing"""
 full_set_pairs = np.append(pairs_sets[0],pairs_sets[1],axis=0)
 full_set_labels = np.append(labels_sets[0],labels_sets[1],axis=0)
 print(full_set_pairs.shape,full_set_labels.shape)
@@ -253,11 +256,11 @@ loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([full_set_pairs[val1,0],full_set_pairs[val1,1]],full_set_labels[val1]),
-                    verbose = True)
+                    verbose = False)
 
 print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(full_set_labels[tst1],np.where(model1.model.predict([full_set_pairs[tst1,0],full_set_pairs[tst1,1]])>0.9,1,0))))
 
-"""2nd approach: Testing with test dataset"""
+"""Siamese+covnet 2nd approach: Testing with test dataset"""
 idx2 = np.arange(pairs_sets[0].shape[0])
 np.random.shuffle(idx2)
 trn2 = idx2[:((int)(pairs_sets[0].shape[0]*0.7))]   # 70% training
@@ -274,12 +277,12 @@ loss = model2.model.fit([pairs_sets[0][trn2,0],pairs_sets[0][trn2,1]],labels_set
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([pairs_sets[0][val2,0],pairs_sets[0][val2,1]],labels_sets[0][val2]),
-                    verbose = True)
+                    verbose = False)
 
-print("Accuracy with independent testing set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model2.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
+print("Accuracy with independent test set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model2.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
 
 
-"""3rd approach: Add genuine signatures from test set and make their forgeries pairs with the closest signateres from the traning set"""
+"""Siamese+covnet 3rd approach: Add genuine signatures from test set and make their forgeries pairs with the closest signateres from the traning set"""
 gn = add_genuines()
 gn.setxy()
 i = 0
@@ -312,6 +315,200 @@ loss = model3.model.fit([x_train[trn3,0],x_train[trn3,1]],y_train[trn3],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([x_train[val3,0],x_train[val3,1]],y_train[val3]),
-                    verbose = True)
+                    verbose = False)
 
-print("Accuracy with independent testing set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model3.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
+print("Accuracy with independent test set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model3.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
+
+
+"""MLP individual signatures classification"""
+
+class batches_indiv():
+    def __init__(self,files):
+        self.files = files
+        self.x_train = []
+        self.y_train = []
+        self.x_test = []
+        self.y_test = []
+
+    def sets(self):
+        for i,f in enumerate(self.files):
+            if i==0:
+                self.x_train, self.y_train = self.load_data(f)
+            else:
+                self.x_test, self.y_test = self.load_data(f)
+
+    def load_data(self,file):
+        X = []
+        with open(file,"r") as f:
+            lines = f.readlines()
+            for line in lines:
+                blocks = line.strip(",:\n").split(",;")
+                X.append([blocks[0].strip().split(":"),blocks[1].strip().split(":")])
+        X = [[[(np.asarray(X[i][j][k].strip(",").split(",")).astype(np.float32)/255)\
+                                    for k in range(len(X[i][j])) if len(X[i][j][k])>0]\
+                                    for j in range(len(X[i]))]\
+                                    for i in range(len(X))] # i:writer, j:genuines or forgeries block, k:id signature in block
+        return self.createxy(X)
+
+    def createxy(self,X):
+        for i,writer in enumerate(X):    # number of authors
+            if i==0:
+                x = writer[0]
+                y = np.ones(len(writer[0]))
+                x = np.append(x,writer[1])
+                y = np.append(y,np.zeros(len(writer[1])))
+            else:
+                x = np.append(x,writer[0])
+                y = np.append(y,np.ones(len(writer[0])))
+                x = np.append(x,writer[1])
+                y = np.append(y,np.zeros(len(writer[1])))
+        return x,y
+
+class mlp_covnet():
+    def __init__(self,sh):
+        self.sh = sh
+
+    def create(self):
+        self.model = self.covnet_features(self.sh)
+
+    def covnet_features(self,sh):
+        img_in = Input(shape = sh, name = 'FeatureNet_ImageInput')
+        n_layer = img_in
+        for i in range(2):
+            n_layer = Conv2D(8*2**i, kernel_size = (1,1), activation = 'linear')(n_layer)
+            n_layer = BatchNormalization()(n_layer)
+            n_layer = Activation('relu')(n_layer)
+            n_layer = Conv2D(16*2**i, kernel_size = (1,1), activation = 'linear')(n_layer)
+            n_layer = BatchNormalization()(n_layer)
+            n_layer = Activation('relu')(n_layer)
+            n_layer = MaxPool2D((2,2))(n_layer)
+        n_layer = Flatten()(n_layer)
+        n_layer = Dense(32, activation = 'linear')(n_layer)
+        #n_layer = Dropout(0.5)(n_layer)
+        n_layer = BatchNormalization()(n_layer)
+        n_layer = Activation('relu')(n_layer)
+        feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
+        #feature_model.summary()
+        return self.classifier(self.sh,feature_model)
+
+    def classifier(self,sh,feature_model):
+        img_in = Input(shape = sh, name = 'Image_Input')
+        img_feat = feature_model(img_in)
+        features = img_feat
+        features = Dense(16, activation = 'linear')(features)
+        features = BatchNormalization()(features)
+        features = Activation('relu')(features)
+        features = Dense(4, activation = 'linear')(features)
+        features = BatchNormalization()(features)
+        features = Activation('relu')(features)
+        features = Dense(1, activation = 'sigmoid')(features)
+        mlp_model = Model(inputs = img_in, outputs = features, name = 'MLP_model')
+        #mlp_model.summary()
+        return mlp_model
+
+datasets = ["traingset.txt","test_questioned.txt"]
+dp2 = batches_indiv(datasets)
+dp2.sets()
+
+dp2.x_train = dp2.x_train.reshape(-1,136,80,1)
+dp2.x_test = dp2.x_test.reshape(-1,136,80,1)
+
+
+"""MLP-covnet 1st approach: Mix datasets and randomely split for traning, validation and testing"""
+x_all = np.append(dp2.x_train,dp2.x_test,axis=0)
+y_all = np.append(dp2.y_train,dp2.y_test,axis=0)
+
+idx4 = np.arange(x_all.shape[0])
+np.random.shuffle(idx4)
+trn4 = idx4[:((int)(x_all.shape[0]*0.6))] #60% training
+val4 = idx4[((int)(x_all.shape[0]*0.6)):((int)(x_all.shape[0]*0.8))] #20% validation
+tst4 = idx4[((int)(x_all.shape[0]*0.8)):] #20% testing
+
+model4 = mlp_covnet(x_all.reshape(-1,136,80,1)[0].shape)
+model4.create()
+model4.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+
+history4 = LossHistory()
+
+loss = model4.model.fit(x_all[trn4],y_all[trn4],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history4],
+                    epochs = 50,
+                    batch_size = 100,
+                    validation_data = (x_all[val4],y_all[val4]),
+                    verbose = False)
+
+print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0))))
+
+
+"""MLP-covnet 2nd approach: Testing with test dataset"""
+idx5 = np.arange(dp2.x_train.shape[0])
+np.random.shuffle(idx5)
+trn5 = idx5[:((int)(dp2.x_train.shape[0] * 0.7))]  # 70% training
+val5 = idx5[((int)(dp2.x_train.shape[0] * 0.7)):]  # 30% validation
+
+model5 = mlp_covnet(dp2.x_train.reshape(-1,136,80,1)[0].shape)
+model5.create()
+model5.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+
+history5 = LossHistory()
+
+loss = model5.model.fit(dp2.x_train[trn5],dp2.y_train[trn5],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history5],
+                    epochs = 50,
+                    batch_size = 100,
+                    validation_data = (dp2.x_train[val5],dp2.y_train[val5]),
+                    verbose = False)
+
+print("Accuracy with independent testing set: {0:2.4f}".format(accuracy_score(dp2.y_test,np.where(model5.model.predict(dp2.x_test)>0.9,1,0))))
+
+
+"""MLP-covnet 3rd approach: Adding the testing set genuines to training set"""
+def load_testset_genuines():
+    with open("testset_ref.txt","r") as f:
+        X = []
+        lines = f.readlines()
+        for line in lines:
+            blocks = line.strip(",:\n").split(",:")
+            X.append(blocks)
+        X = [(np.asarray(X[i][j].strip(",").split(",")).astype(np.float32)/255) for i in range(len(X))\
+                                                                                for j in range(len(X[i]))]
+    return X
+
+aux = load_testset_genuines()
+dp2.x_train = np.append(dp2.x_train,np.asarray(aux).reshape(-1,136,80,1),axis=0)
+dp2.y_train = np.append(dp2.y_train,np.ones(np.asarray(aux).shape[0]),axis=0)
+
+idx6 = np.arange(dp2.x_train.shape[0])
+np.random.shuffle(idx6)
+trn6 = idx6[:((int)(dp2.x_train.shape[0] * 0.7))]  # 70% training
+val6 = idx6[((int)(dp2.x_train.shape[0] * 0.7)):]  # 30% validation
+
+model6 = mlp_covnet(dp2.x_train.reshape(-1,136,80,1)[0].shape)
+model6.create()
+model6.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+
+history6 = LossHistory()
+
+loss = model6.model.fit(dp2.x_train[trn6],dp2.y_train[trn6],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history6],
+                    epochs = 50,
+                    batch_size = 100,
+                    validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
+                    verbose = False)
+
+print("Accuracy with independent test set : {0:2.4f}".format(accuracy_score(dp2.y_test,np.where(model6.model.predict(dp2.x_test)>0.9,1,0))))
+
+
+
+"""SVM Individual signatures classification """
+
+
+
+clf1 = SVC()
+idx7 = np.arange(x_all.shape[0])
+np.random.shuffle(idx7)
+trn7 = idx7[:((int)(x_all.shape[0]*0.8))] #80% training
+tst7 = idx7[((int)(x_all.shape[0]*0.8)):] #20% testing
+
+clf.fit(x_all[trn7],y_all[trn7])
+print("Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(np.where(clf.predict(x_all[tst7])>0.9,1,0))))
