@@ -534,7 +534,7 @@ class svm_convnet():
 idx7 = np.arange(x_all.shape[0])
 np.random.shuffle(idx7)
 trn7 = idx7[:((int)(x_all.shape[0]*0.6))] #60% training
-val4 = idx7[((int)(x_all.shape[0]*0.6)):((int)(x_all.shape[0]*0.8))] #20% validation
+val7 = idx7[((int)(x_all.shape[0]*0.6)):((int)(x_all.shape[0]*0.8))] #20% validation
 tst7 = idx7[((int)(x_all.shape[0]*0.8)):] #20% testing
 
 model7 = svm_convnet(x_all.reshape(-1,136,80,1)[0].shape)
