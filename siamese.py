@@ -444,7 +444,7 @@ model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history4 = LossHistory()
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history5],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history4],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
