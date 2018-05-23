@@ -538,7 +538,7 @@ model7.model.compile(optimizer='nadam', loss='hinge', metrics = ['mae','acc'])
 history7 = LossHistory()
 
 loss = model7.model.fit(x_all[trn7],y_all[trn7],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history7],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history7],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val7],y_all[val7]),
