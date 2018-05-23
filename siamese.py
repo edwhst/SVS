@@ -562,8 +562,6 @@ print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}
 
 
 """SVM+convnet 2nd approach: Testing with test dataset"""
-x_train_indiv = dp2.x_train
-y_train_indiv = dp2.y_train
 y_train_indiv = np.where(y_train_indiv==0,-1,y_train_indiv)
 
 idx8 = np.arange(x_train_indiv.shape[0])
