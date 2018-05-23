@@ -432,7 +432,7 @@ model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history4 = LossHistory()
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history4],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history4],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
@@ -458,7 +458,7 @@ model5.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history5 = LossHistory()
 
 loss = model5.model.fit(dp2.x_train[trn5],dp2.y_train[trn5],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history5],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history5],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val5],dp2.y_train[val5]),
@@ -496,7 +496,7 @@ model6.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history6 = LossHistory()
 
 loss = model6.model.fit(dp2.x_train[trn6],dp2.y_train[trn6],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history6],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history6],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
@@ -551,7 +551,7 @@ model7.model.compile(optimizer='adadelta', loss='hinge', metrics = ['mae','acc']
 history7 = LossHistory()
 
 loss = model7.model.fit(x_all[trn7],y_all[trn7],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history7],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history7],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val7],y_all[val7]),
@@ -576,7 +576,7 @@ model8.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc
 history8 = LossHistory()
 
 loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history8],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history8],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_train_indiv[val8],y_train_indiv[val8]),
@@ -601,7 +601,7 @@ model9.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc
 history9 = LossHistory()
 
 loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history9],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history9],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
