@@ -523,7 +523,8 @@ class svm_convnet():
         n_layer = Flatten()(n_layer)
         n_layer = Dense(32, activation = 'linear')(n_layer)
         n_layer = BatchNormalization()(n_layer)
-        n_layer = Activation('linear')(n_layer)
+        n_layer = Activation('relu')(n_layer)
+        n_layer = Dense(1, activation = 'linear')(n_layer)
         feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
         #feature_model.summary()
         return feature_model
@@ -547,8 +548,8 @@ loss = model7.model.fit(x_all[trn7],y_all[trn7],
                     callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history7],
                     epochs = 50,
                     batch_size = 100,
-                    validation_data = (dp2.x_train[val7],dp2.y_train[val7]),
-                    verbose = False)
+                    validation_data = (x_all[val7],y_all[val7]),
+                    verbose = True)
 
 print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,0))))
 
@@ -558,7 +559,7 @@ h_losses = [history1,
             history3,
             history4,
             history5,
-            history6,]
+            history6]
             #history7,
             #history8,
             #history9]
@@ -568,7 +569,7 @@ labels = ['Siamese+convnet sets mixture val loss',
           'Siamese+convnet with genuines added for taining val loss',
           'MLP+convnet sets mixture val loss',
           'MLP+convnet indpendent test set val loss',
-          'MLP+convnet with genuines added for taining val loss',]
+          'MLP+convnet with genuines added for taining val loss']
           #'SVM+convnet sets mixture val loss',
           #'SVM+convnet indpendent test set val loss',
           #'SVM+convnet with genuines added for taining val loss',]
@@ -581,3 +582,5 @@ def plot_progression(h_losses,labels):
     plt.xlabel("Epoch")
     plt.ylabel("Total error")
     plt.savefig('losses.png')
+
+plot_progression(h_losses,labels)
