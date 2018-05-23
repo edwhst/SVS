@@ -442,17 +442,13 @@ model4.create()
 model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history4 = LossHistory()
-EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
-checkpoint = callbacks.ModelCheckpoint('.bestmodel4.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
-                    callbacks=[EarlyStopping,checkpoint,history4],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history5],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
                     verbose = False)
-
-model4.model.load_weights(filepath = '.bestmodel4.hdf5')
 
 score.append(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0)))
 print("MLP+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
