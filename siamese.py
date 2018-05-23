@@ -1,3 +1,17 @@
+""" 
+   Institution:     KTH Royal Institute of Technology
+   Course:          DD2424 deepl18 VT18-1 Deep Learning in Data Science
+   Project:         OFFLINE SIGNATURE VERIFICATION SYSTEM (SVS)
+   Canvas Group:    DD2424 Project Group SVS
+   Team Members:    Eduardo Horst Morales, Chapwit Na Muangtoun, Zhiyuan Wang
+   Implementation inspired by:
+   1) https://www.kaggle.com/kmader/image-similarity-with-siamese-networks
+   2) https://cambridgespark.com/content/tutorials/convolutional-neural-networks-with-keras/index.html
+   3) https://github.com/NVIDIA/keras/blob/master/examples/mnist_siamese_graph.py
+   4) https://github.com/adventuresinML/adventures-in-ml-code/blob/master/keras_cnn.py
+   5) https://sorenbouma.github.io/blog/oneshot/
+"""
+
 import numpy as np
 from keras.regularizers import l2
 from keras import backend as K
@@ -432,11 +446,11 @@ model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history4 = LossHistory()
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history4],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history4],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
-                    verbose = False)
+                    verbose = True)
 
 score.append(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0)))
 print("MLP+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -458,11 +472,11 @@ model5.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history5 = LossHistory()
 
 loss = model5.model.fit(dp2.x_train[trn5],dp2.y_train[trn5],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history5],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history5],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val5],dp2.y_train[val5]),
-                    verbose = False)
+                    verbose = True)
 
 score.append(accuracy_score(dp2.y_test,np.where(model5.model.predict(dp2.x_test)>0.9,1,0)))
 print("MLP+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -496,11 +510,11 @@ model6.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history6 = LossHistory()
 
 loss = model6.model.fit(dp2.x_train[trn6],dp2.y_train[trn6],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history6],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history6],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
-                    verbose = False)
+                    verbose = True)
 
 score.append(accuracy_score(dp2.y_test,np.where(model6.model.predict(dp2.x_test)>0.9,1,0)))
 print("MLP+convnet | Accuracy with independent test set(+genuines in train set): {0:2.4f}".format(score[-1]))
@@ -551,11 +565,11 @@ model7.model.compile(optimizer='adadelta', loss='hinge', metrics = ['mae','acc']
 history7 = LossHistory()
 
 loss = model7.model.fit(x_all[trn7],y_all[trn7],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history7],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history7],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val7],y_all[val7]),
-                    verbose = False)
+                    verbose = True)
 
 score.append(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0,1,-1)))
 print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -576,11 +590,11 @@ model8.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc
 history8 = LossHistory()
 
 loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history8],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history8],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_train_indiv[val8],y_train_indiv[val8]),
-                    verbose = False)
+                    verbose = True)
 
 score.append(accuracy_score(dp2.y_test,np.where(model8.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -601,11 +615,11 @@ model9.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc
 history9 = LossHistory()
 
 loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history9],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history9],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
-                    verbose = False)
+                    verbose = True)
 
 score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set(+genuines in train set): {0:2.4f}".format(score[-1]))
