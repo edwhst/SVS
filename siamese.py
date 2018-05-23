@@ -264,7 +264,7 @@ model1.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 
 history1 = LossHistory()
 EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
-checkpoint = callbacks.ModelCheckpoint('.bestmodel.hdf5', monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
+checkpoint = callbacks.ModelCheckpoint('.bestmodel.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set_labels[trn1],
                     callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history1],
