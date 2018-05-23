@@ -552,8 +552,8 @@ h_losses = [history1,
             history3,
             history4,
             history5,
-            history6]
-            #history7,
+            history6,
+            history7]
             #history8,
             #history9]
 
@@ -562,8 +562,8 @@ labels = ['Siamese+convnet sets mixture val loss',
           'Siamese+convnet with genuines added for taining val loss',
           'MLP+convnet sets mixture val loss',
           'MLP+convnet indpendent test set val loss',
-          'MLP+convnet with genuines added for taining val loss']
-          #'SVM+convnet sets mixture val loss',
+          'MLP+convnet with genuines added for taining val loss',
+          'SVM+convnet sets mixture val loss']
           #'SVM+convnet indpendent test set val loss',
           #'SVM+convnet with genuines added for taining val loss',]
 
@@ -571,6 +571,7 @@ labels = ['Siamese+convnet sets mixture val loss',
 plt.figure()
 for i,h in enumerate(h_losses):
     plt.plot(np.asarray(h.losses_val),linewidth=2,label=labels[i]) 
+plt.legend()
 plt.title("Models validation losses progressions")
 plt.xlabel("Epoch")
 plt.ylabel("Total error")
