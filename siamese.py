@@ -450,7 +450,7 @@ loss = model4.model.fit(x_all[trn4],y_all[trn4],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
-                    verbose = True)
+                    verbose = False)
 
 model4.model.load_weights(filepath = '.bestmodel.hdf5')
 
@@ -478,7 +478,7 @@ loss = model5.model.fit(dp2.x_train[trn5],dp2.y_train[trn5],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val5],dp2.y_train[val5]),
-                    verbose = True)
+                    verbose = False)
 
 score.append(accuracy_score(dp2.y_test,np.where(model5.model.predict(dp2.x_test)>0.9,1,0)))
 print("MLP+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -516,7 +516,7 @@ loss = model6.model.fit(dp2.x_train[trn6],dp2.y_train[trn6],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
-                    verbose = True)
+                    verbose = False)
 
 score.append(accuracy_score(dp2.y_test,np.where(model6.model.predict(dp2.x_test)>0.9,1,0)))
 print("MLP+convnet | Accuracy with independent test set(+genuines in train set): {0:2.4f}".format(score[-1]))
@@ -571,7 +571,7 @@ loss = model7.model.fit(x_all[trn7],y_all[trn7],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val7],y_all[val7]),
-                    verbose = True)
+                    verbose = False)
 
 model7.model.load_weights(filepath = '.bestmodel.hdf5')
 
@@ -598,7 +598,7 @@ loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_train_indiv[val8],y_train_indiv[val8]),
-                    verbose = True)
+                    verbose = False)
 
 model8.model.load_weights(filepath = '.bestmodel.hdf5')
 
@@ -625,7 +625,7 @@ loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
-                    verbose = True)
+                    verbose = False)
 
 model9.model.load_weights(filepath = '.bestmodel.hdf5')
 
