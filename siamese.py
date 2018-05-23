@@ -533,7 +533,8 @@ class svm_convnet():
 
 idx7 = np.arange(x_all.shape[0])
 np.random.shuffle(idx7)
-trn7 = idx7[:((int)(x_all.shape[0]*0.8))] #80% training
+trn7 = idx7[:((int)(x_all.shape[0]*0.6))] #60% training
+val4 = idx7[((int)(x_all.shape[0]*0.6)):((int)(x_all.shape[0]*0.8))] #20% validation
 tst7 = idx7[((int)(x_all.shape[0]*0.8)):] #20% testing
 
 model7 = svm_convnet(x_all.reshape(-1,136,80,1)[0].shape)
@@ -546,10 +547,10 @@ loss = model7.model.fit(x_all[trn7],y_all[trn7],
                     callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.2, verbose=1),history7],
                     epochs = 50,
                     batch_size = 100,
-                    validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
+                    validation_data = (dp2.x_train[val7],dp2.y_train[val7]),
                     verbose = False)
 
-print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(x_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,0))))
+print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,0))))
 
 
 h_losses = [history1,
