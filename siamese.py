@@ -581,7 +581,7 @@ val8 = idx8[((int)(x_train_indiv.shape[0] * 0.7)):]  # 30% validation
 
 model8 = svm_convnet(x_train_indiv.reshape(-1,136,80,1)[0].shape)
 model8.create()
-model8.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+model8.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc'])
 
 history8 = LossHistory()
 
@@ -608,7 +608,7 @@ val9 = idx9[((int)(dp2.x_train.shape[0] * 0.7)):]  # 30% validation
 
 model9 = svm_convnet(dp2.x_train.reshape(-1,136,80,1)[0].shape)
 model9.create()
-model9.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+model9.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc'])
 
 history9 = LossHistory()
 
