@@ -574,5 +574,4 @@ for i,h in enumerate(h_losses):
 plt.title("Models validation losses progressions")
 plt.xlabel("Epoch")
 plt.ylabel("Total error")
-plt.show(hold=False)
-plt.savefig('losses.pn
+plt.savefig("losses.png")
