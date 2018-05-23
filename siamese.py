@@ -263,8 +263,6 @@ model1.create()
 model1.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history1 = LossHistory()
-EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
-checkpoint = callbacks.ModelCheckpoint('.bestmodel.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set_labels[trn1],
                     callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history1],
@@ -444,6 +442,8 @@ model4.create()
 model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history4 = LossHistory()
+EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
+checkpoint = callbacks.ModelCheckpoint('.bestmodel4.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
                     callbacks=[EarlyStopping,checkpoint,history4],
@@ -452,7 +452,7 @@ loss = model4.model.fit(x_all[trn4],y_all[trn4],
                     validation_data = (x_all[val4],y_all[val4]),
                     verbose = False)
 
-model4.model.load_weights(filepath = '.bestmodel.hdf5')
+model4.model.load_weights(filepath = '.bestmodel4.hdf5')
 
 score.append(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0)))
 print("MLP+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -565,6 +565,8 @@ model7.create()
 model7.model.compile(optimizer='adadelta', loss='hinge', metrics = ['mae','acc'])
 
 history7 = LossHistory()
+EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
+checkpoint = callbacks.ModelCheckpoint('.bestmodel7.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model7.model.fit(x_all[trn7],y_all[trn7],
                     callbacks=[EarlyStopping,checkpoint,history7],
@@ -573,7 +575,7 @@ loss = model7.model.fit(x_all[trn7],y_all[trn7],
                     validation_data = (x_all[val7],y_all[val7]),
                     verbose = False)
 
-model7.model.load_weights(filepath = '.bestmodel.hdf5')
+model7.model.load_weights(filepath = '.bestmodel7.hdf5')
 
 score.append(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0,1,-1)))
 print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -592,6 +594,8 @@ model8.create()
 model8.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc'])
 
 history8 = LossHistory()
+EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
+checkpoint = callbacks.ModelCheckpoint('.bestmodel8.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
                     callbacks=[EarlyStopping,checkpoint,history8],
@@ -600,7 +604,7 @@ loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
                     validation_data = (x_train_indiv[val8],y_train_indiv[val8]),
                     verbose = False)
 
-model8.model.load_weights(filepath = '.bestmodel.hdf5')
+model8.model.load_weights(filepath = '.bestmodel8.hdf5')
 
 score.append(accuracy_score(dp2.y_test,np.where(model8.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -619,6 +623,8 @@ model9.create()
 model9.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc'])
 
 history9 = LossHistory()
+EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
+checkpoint = callbacks.ModelCheckpoint('.bestmodel9.hdf5', monitor='val_mean_absolute_error', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
                     callbacks=[EarlyStopping,checkpoint,history9],
@@ -627,38 +633,38 @@ loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
                     validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
                     verbose = False)
 
-model9.model.load_weights(filepath = '.bestmodel.hdf5')
+model9.model.load_weights(filepath = '.bestmodel9.hdf5')
 
 score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set(+genuines in train set): {0:2.4f}".format(score[-1]))
 
+h_losses = []
+labels = []
 
-h_losses = [history1,
-            history2,
-            history3,
-            history4,
-            history5,
-            history6,
-            history7,
-            history8,
-            history9]
+h_losses.append([history1,history2,history3])
+h_losses.append([history4,history5,history6])
+h_losses.append([history7,history8,history9])
 
-labels = ['Siamese+convnet sets mixture val loss',
+labels.append(['Siamese+convnet sets mixture val loss',
           'Siamese+convnet indpendent test set val loss',
-          'Siamese+convnet with genuines added for taining val loss',
-          'MLP+convnet sets mixture val loss',
+          'Siamese+convnet with genuines added for taining val loss'])
+labels.append(['MLP+convnet sets mixture val loss',
           'MLP+convnet indpendent test set val loss',
-          'MLP+convnet with genuines added for taining val loss',
-          'SVM+convnet sets mixture val loss',
+          'MLP+convnet with genuines added for taining val loss'])
+labels.append(['SVM+convnet sets mixture val loss',
           'SVM+convnet indpendent test set val loss',
-          'SVM+convnet with genuines added for taining val loss']
+          'SVM+convnet with genuines added for taining val loss'])
 
 
-plt.figure()
-for i,h in enumerate(h_losses):
-    plt.plot(np.asarray(h.losses_val),linewidth=2,label=labels[i]) 
-plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
-plt.title("Models validation losses progressions")
-plt.xlabel("Epoch")
-plt.ylabel("Total error")
-plt.savefig("losses.png")
+for j in range(len(labels)):
+    aux = "losses" + str(j) + ".png"
+    plt.figure()
+    for i,h in enumerate(h_losses[j]):
+        plt.plot(np.asarray(h.losses_val),linewidth=2,label=labels[j][i]) 
+    plt.legend(loc=9, bbox_to_anchor=(0.5, -0.1))
+    plt.title("Models validation losses progressions")
+    plt.xlabel("Epoch")
+    plt.ylabel("Total error")
+    plt.tight_layout()
+    plt.savefig(aux)
+
