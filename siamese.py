@@ -446,11 +446,13 @@ model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics
 history4 = LossHistory()
 
 loss = model4.model.fit(x_all[trn4],y_all[trn4],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history4],
+                    callbacks=[EarlyStopping,checkpoint,history4],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val4],y_all[val4]),
                     verbose = True)
+
+model4.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0)))
 print("MLP+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -565,11 +567,13 @@ model7.model.compile(optimizer='adadelta', loss='hinge', metrics = ['mae','acc']
 history7 = LossHistory()
 
 loss = model7.model.fit(x_all[trn7],y_all[trn7],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history7],
+                    callbacks=[EarlyStopping,checkpoint,history7],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_all[val7],y_all[val7]),
                     verbose = True)
+
+model7.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0,1,-1)))
 print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -590,11 +594,13 @@ model8.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc
 history8 = LossHistory()
 
 loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history8],
+                    callbacks=[EarlyStopping,checkpoint,history8],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (x_train_indiv[val8],y_train_indiv[val8]),
                     verbose = True)
+
+model8.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(dp2.y_test,np.where(model8.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -615,11 +621,13 @@ model9.model.compile(optimizer='adadelta', loss = 'hinge', metrics = ['mae','acc
 history9 = LossHistory()
 
 loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.1, verbose=1),history9],
+                    callbacks=[EarlyStopping,checkpoint,history9],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
                     verbose = True)
+
+model9.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set(+genuines in train set): {0:2.4f}".format(score[-1]))
