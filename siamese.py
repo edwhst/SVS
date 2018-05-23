@@ -30,7 +30,7 @@ class EarlyStopping_byvalue(callbacks.Callback):
      def on_epoch_end(self,epoch, logs={}):
         current = logs.get(self.monitor)
         if current is not None:
-            if current < self.value:
+            if current < self.value and epoch > 4:
                 if self.verbose > 0:
                     print("Early stopping at epoch %02d" % epoch)
                     self.model.stop_training = True
@@ -574,13 +574,12 @@ labels = ['Siamese+convnet sets mixture val loss',
           #'SVM+convnet indpendent test set val loss',
           #'SVM+convnet with genuines added for taining val loss',]
 
-def plot_progression(h_losses,labels):
-    plt.figure()
-    for i,h in enumerate(h_losses):
-        plt.plot(np.asarray(h.losses_val),linewidth=2,label=labels[i]) 
-    plt.title("Models validation losses progressions")
-    plt.xlabel("Epoch")
-    plt.ylabel("Total error")
-    plt.savefig('losses.png')
 
-plot_progression(h_losses,labels)
+plt.figure()
+for i,h in enumerate(h_losses):
+    plt.plot(np.asarray(h.losses_val),linewidth=2,label=labels[i]) 
+plt.title("Models validation losses progressions")
+plt.xlabel("Epoch")
+plt.ylabel("Total error")
+plt.show(hold=False)
+plt.savefig('losses.png')
