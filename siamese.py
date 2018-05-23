@@ -5,10 +5,10 @@ from keras import callbacks
 from keras.models import Model
 from keras.layers import Input, Conv2D, BatchNormalization, MaxPool2D, Activation, Flatten, Dense, Dropout
 from keras.layers import concatenate
-import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
-from sklearn.svm import SVC
-from sklearn.pipeline import Pipeline
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 
 class LossHistory(callbacks.Callback):
     def on_train_begin(self, logs={}):
@@ -182,11 +182,9 @@ class siamese_convnet():
             n_layer = MaxPool2D((2,2))(n_layer)
         n_layer = Flatten()(n_layer)
         n_layer = Dense(32, activation = 'linear')(n_layer)
-        #n_layer = Dropout(0.5)(n_layer)
         n_layer = BatchNormalization()(n_layer)
         n_layer = Activation('relu')(n_layer)
         feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
-        #feature_model.summary()
         return self.similarity(self.sh,feature_model)
 
     def similarity(self,sh,feature_model):
@@ -203,7 +201,6 @@ class siamese_convnet():
         combined_features = Activation('relu')(combined_features)
         combined_features = Dense(1, activation = 'sigmoid')(combined_features)
         similarity_model = Model(inputs = [img_a_in, img_b_in], outputs = [combined_features], name = 'Similarity_Model')
-        #similarity_model.summary()
         return similarity_model
 
 
@@ -385,11 +382,9 @@ class mlp_convnet():
             n_layer = MaxPool2D((2,2))(n_layer)
         n_layer = Flatten()(n_layer)
         n_layer = Dense(32, activation = 'linear')(n_layer)
-        #n_layer = Dropout(0.5)(n_layer)
         n_layer = BatchNormalization()(n_layer)
         n_layer = Activation('relu')(n_layer)
         feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
-        #feature_model.summary()
         return self.classifier(self.sh,feature_model)
 
     def classifier(self,sh,feature_model):
@@ -404,7 +399,6 @@ class mlp_convnet():
         features = Activation('relu')(features)
         features = Dense(1, activation = 'sigmoid')(features)
         mlp_model = Model(inputs = img_in, outputs = features, name = 'MLP_model')
-        #mlp_model.summary()
         return mlp_model
 
 datasets = ["traingset.txt","test_questioned.txt"]
@@ -526,7 +520,6 @@ class svm_convnet():
         n_layer = Activation('relu')(n_layer)
         n_layer = Dense(1, activation = 'linear')(n_layer)
         feature_model = Model(inputs = [img_in], outputs = [n_layer], name = 'FeatureGenerationModel')
-        #feature_model.summary()
         return feature_model
 
 
@@ -582,4 +575,4 @@ plt.title("Models validation losses progressions")
 plt.xlabel("Epoch")
 plt.ylabel("Total error")
 plt.show(hold=False)
-plt.savefig('losses.png')
+plt.savefig('losses.pn
