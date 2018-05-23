@@ -617,12 +617,12 @@ loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
-                    verbose = True)
+                    verbose = False)
 
 model9.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0.9,1,-1)))
-print("MLP+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
+print("SVM+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
 
 
 h_losses = [history1,
