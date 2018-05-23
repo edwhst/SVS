@@ -203,6 +203,7 @@ class siamese_convnet():
         similarity_model = Model(inputs = [img_a_in, img_b_in], outputs = [combined_features], name = 'Similarity_Model')
         return similarity_model
 
+score = []
 
 datasets = ["traingset.txt","test_questioned.txt"]
 dp = batches(datasets)
@@ -256,7 +257,8 @@ loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set
                     validation_data = ([full_set_pairs[val1,0],full_set_pairs[val1,1]],full_set_labels[val1]),
                     verbose = False)
 
-print("Siamese+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(full_set_labels[tst1],np.where(model1.model.predict([full_set_pairs[tst1,0],full_set_pairs[tst1,1]])>0.9,1,0))))
+score.append(accuracy_score(full_set_labels[tst1],np.where(model1.model.predict([full_set_pairs[tst1,0],full_set_pairs[tst1,1]])>0.9,1,0)))
+print("Siamese+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
 
 """Siamese+convnet 2nd approach: Testing with test dataset"""
 idx2 = np.arange(pairs_sets[0].shape[0])
@@ -277,7 +279,8 @@ loss = model2.model.fit([pairs_sets[0][trn2,0],pairs_sets[0][trn2,1]],labels_set
                     validation_data = ([pairs_sets[0][val2,0],pairs_sets[0][val2,1]],labels_sets[0][val2]),
                     verbose = False)
 
-print("Siamese+convnet | Accuracy with independent test set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model2.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
+score.append(accuracy_score(labels_sets[1],np.where(model2.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0)))
+print("Siamese+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
 
 
 """Siamese+convnet 3rd approach: Add genuine signatures from test set and make their forgeries pairs with the closest signateres from the traning set"""
@@ -315,7 +318,8 @@ loss = model3.model.fit([x_train[trn3,0],x_train[trn3,1]],y_train[trn3],
                     validation_data = ([x_train[val3,0],x_train[val3,1]],y_train[val3]),
                     verbose = False)
 
-print("Siamese+convnet | Accuracy with independent test set: {0:2.4f}".format(accuracy_score(labels_sets[1],np.where(model3.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0))))
+score.append(accuracy_score(labels_sets[1],np.where(model3.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0)))
+print("Siamese+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
 
 
 """MLP individual signatures classification"""
@@ -432,10 +436,14 @@ loss = model4.model.fit(x_all[trn4],y_all[trn4],
                     validation_data = (x_all[val4],y_all[val4]),
                     verbose = False)
 
-print("MLP+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0))))
+score.append(accuracy_score(y_all[tst4],np.where(model4.model.predict(x_all[tst4])>0.9,1,0)))
+print("MLP+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
 
 
 """MLP+convnet 2nd approach: Testing with test dataset"""
+x_train_indiv = dp2.x_train
+y_train_indiv = dp2.y_train
+
 idx5 = np.arange(dp2.x_train.shape[0])
 np.random.shuffle(idx5)
 trn5 = idx5[:((int)(dp2.x_train.shape[0] * 0.7))]  # 70% training
@@ -454,7 +462,8 @@ loss = model5.model.fit(dp2.x_train[trn5],dp2.y_train[trn5],
                     validation_data = (dp2.x_train[val5],dp2.y_train[val5]),
                     verbose = False)
 
-print("MLP+convnet | Accuracy with independent testing set: {0:2.4f}".format(accuracy_score(dp2.y_test,np.where(model5.model.predict(dp2.x_test)>0.9,1,0))))
+score.append(accuracy_score(dp2.y_test,np.where(model5.model.predict(dp2.x_test)>0.9,1,0)))
+print("MLP+convnet | Accuracy with independent testing set: {0:2.4f}".format(score[-1]))
 
 
 """MLP-convnet 3rd approach: Adding the testing set genuines to training set"""
@@ -491,7 +500,8 @@ loss = model6.model.fit(dp2.x_train[trn6],dp2.y_train[trn6],
                     validation_data = (dp2.x_train[val6],dp2.y_train[val6]),
                     verbose = False)
 
-print("MLP+convnet | Accuracy with independent test set: {0:2.4f}".format(accuracy_score(dp2.y_test,np.where(model6.model.predict(dp2.x_test)>0.9,1,0))))
+score.append(accuracy_score(dp2.y_test,np.where(model6.model.predict(dp2.x_test)>0.9,1,0)))
+print("MLP+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
 
 
 """SVM Individual signatures classification """
@@ -524,6 +534,7 @@ class svm_convnet():
 
 
 """SVM+convnet 1st approach: Mix datasets and randomely split for traning, validation and testing"""
+y_all = np.where(y_all==0,-1,y_all)
 
 idx7 = np.arange(x_all.shape[0])
 np.random.shuffle(idx7)
@@ -533,7 +544,7 @@ tst7 = idx7[((int)(x_all.shape[0]*0.8)):] #20% testing
 
 model7 = svm_convnet(x_all.reshape(-1,136,80,1)[0].shape)
 model7.create()
-model7.model.compile(optimizer='nadam', loss='hinge', metrics = ['mae','acc'])
+model7.model.compile(optimizer='adadelta', loss='hinge', metrics = ['mae','acc'])
 
 history7 = LossHistory()
 
@@ -544,7 +555,60 @@ loss = model7.model.fit(x_all[trn7],y_all[trn7],
                     validation_data = (x_all[val7],y_all[val7]),
                     verbose = True)
 
-print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,0))))
+score.append(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,-1)))
+print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
+
+
+"""SVM+convnet 2nd approach: Testing with test dataset"""
+x_train_indiv = dp2.x_train
+y_train_indiv = dp2.y_train
+y_train_indiv = np.where(y_train_indiv==0,-1,y_train_indiv)
+
+idx8 = np.arange(x_train_indiv.shape[0])
+np.random.shuffle(idx8)
+trn8 = idx8[:((int)(x_train_indiv.shape[0] * 0.7))]  # 70% training
+val8 = idx8[((int)(x_train_indiv.shape[0] * 0.7)):]  # 30% validation
+
+model8 = svm_convnet(x_train_indiv.reshape(-1,136,80,1)[0].shape)
+model8.create()
+model8.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+
+history8 = LossHistory()
+
+loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history8],
+                    epochs = 50,
+                    batch_size = 100,
+                    validation_data = (x_train_indiv[val8],y_train_indiv[val8]),
+                    verbose = True)
+
+score.append(accuracy_score(dp2.y_test,np.where(model8.model.predict(dp2.x_test)>0.9,1,-1)))
+print("SVM+convnet | Accuracy with independent testing set: {0:2.4f}".format(score[-1]))
+
+
+"""SVM-convnet 3rd approach: Adding the testing set genuines to training set"""
+dp2.y_train = np.where(dp2.y_train==0,-1,dp2.y_train)
+
+idx9 = np.arange(dp2.x_train.shape[0])
+np.random.shuffle(idx9)
+trn9 = idx9[:((int)(dp2.x_train.shape[0] * 0.7))]  # 70% training
+val9 = idx9[((int)(dp2.x_train.shape[0] * 0.7)):]  # 30% validation
+
+model9 = svm_convnet(dp2.x_train.reshape(-1,136,80,1)[0].shape)
+model9.create()
+model9.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+
+history9 = LossHistory()
+
+loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history9],
+                    epochs = 50,
+                    batch_size = 100,
+                    validation_data = (dp2.x_train[val9],dp2.y_train[val9]),
+                    verbose = True)
+
+score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0.9,1,-1)))
+print("MLP+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
 
 
 h_losses = [history1,
@@ -553,9 +617,9 @@ h_losses = [history1,
             history4,
             history5,
             history6,
-            history7]
-            #history8,
-            #history9]
+            history7,
+            history8,
+            history9]
 
 labels = ['Siamese+convnet sets mixture val loss',
           'Siamese+convnet indpendent test set val loss',
@@ -563,9 +627,9 @@ labels = ['Siamese+convnet sets mixture val loss',
           'MLP+convnet sets mixture val loss',
           'MLP+convnet indpendent test set val loss',
           'MLP+convnet with genuines added for taining val loss',
-          'SVM+convnet sets mixture val loss']
-          #'SVM+convnet indpendent test set val loss',
-          #'SVM+convnet with genuines added for taining val loss',]
+          'SVM+convnet sets mixture val loss',
+          'SVM+convnet indpendent test set val loss',
+          'SVM+convnet with genuines added for taining val loss',]
 
 
 plt.figure()
