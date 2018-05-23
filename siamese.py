@@ -629,7 +629,7 @@ labels = ['Siamese+convnet sets mixture val loss',
           'MLP+convnet with genuines added for taining val loss',
           'SVM+convnet sets mixture val loss',
           'SVM+convnet indpendent test set val loss',
-          'SVM+convnet with genuines added for taining val loss',]
+          'SVM+convnet with genuines added for taining val loss']
 
 
 plt.figure()
