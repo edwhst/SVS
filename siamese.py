@@ -531,8 +531,10 @@ class svm_covnet():
 
     def svm_pipeline(self,feature_model):
         clf = SVC()
-        pipe = Pipeline(steps=[('covnet',feature_model),('svm'),clf])
+        pipe = Pipeline(steps=[('covnet',feature_model),('svm',clf)])
         return pipe
+
+"""SVM-covnet 1st approach: Mix datasets and randomely split for traning, validation and testing"""
 
 idx7 = np.arange(x_all.shape[0])
 np.random.shuffle(idx7)
