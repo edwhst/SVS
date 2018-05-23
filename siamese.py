@@ -249,13 +249,18 @@ model1.create()
 model1.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history1 = LossHistory()
+EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
+checkpoint = callbacks.ModelCheckpoint('.bestmodel.hdf5', monitor='val_loss', verbose=0, save_best_only=False, save_weights_only=False, mode='auto', period=1)
 
 loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set_labels[trn1],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history1],
+                    #callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history1],
+                    callbacks=[EarlyStopping,checkpoint,history1],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([full_set_pairs[val1,0],full_set_pairs[val1,1]],full_set_labels[val1]),
                     verbose = False)
+
+model1.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(full_set_labels[tst1],np.where(model1.model.predict([full_set_pairs[tst1,0],full_set_pairs[tst1,1]])>0.9,1,0)))
 print("Siamese+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
@@ -273,11 +278,14 @@ model2.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history2 = LossHistory()
 
 loss = model2.model.fit([pairs_sets[0][trn2,0],pairs_sets[0][trn2,1]],labels_sets[0][trn2],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history2],
+                    #callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history2],
+                    callbacks=[EarlyStopping,checkpoint,history2],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([pairs_sets[0][val2,0],pairs_sets[0][val2,1]],labels_sets[0][val2]),
                     verbose = False)
+
+model2.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(labels_sets[1],np.where(model2.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0)))
 print("Siamese+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -312,11 +320,14 @@ model3.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history3 = LossHistory()
 
 loss = model3.model.fit([x_train[trn3,0],x_train[trn3,1]],y_train[trn3],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history3],
+                    #callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history3],
+                    callbacks=[EarlyStopping,checkpoint,history3],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([x_train[val3,0],x_train[val3,1]],y_train[val3]),
                     verbose = False)
+
+model3.model.load_weights(filepath = '.bestmodel.hdf5')
 
 score.append(accuracy_score(labels_sets[1],np.where(model3.model.predict([pairs_sets[1][:,0],pairs_sets[1][:,1]])>0.9,1,0)))
 print("Siamese+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
@@ -425,7 +436,7 @@ tst4 = idx4[((int)(x_all.shape[0]*0.8)):] #20% testing
 
 model4 = mlp_convnet(x_all.reshape(-1,136,80,1)[0].shape)
 model4.create()
-model4.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+model4.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history4 = LossHistory()
 EarlyStopping = callbacks.EarlyStopping(monitor='val_mean_absolute_error', min_delta=0.01, patience=5, verbose=0, mode='auto')
@@ -455,7 +466,7 @@ val5 = idx5[((int)(dp2.x_train.shape[0] * 0.7)):]  # 30% validation
 
 model5 = mlp_convnet(dp2.x_train.reshape(-1,136,80,1)[0].shape)
 model5.create()
-model5.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+model5.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history5 = LossHistory()
 
@@ -495,7 +506,7 @@ val6 = idx6[((int)(dp2.x_train.shape[0] * 0.7)):]  # 30% validation
 
 model6 = mlp_convnet(dp2.x_train.reshape(-1,136,80,1)[0].shape)
 model6.create()
-model6.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = ['mae','acc'])
+model6.model.compile(optimizer='adadelta', loss = 'binary_crossentropy', metrics = ['mae','acc'])
 
 history6 = LossHistory()
 
@@ -565,7 +576,7 @@ loss = model7.model.fit(x_all[trn7],y_all[trn7],
 
 model7.model.load_weights(filepath = '.bestmodel.hdf5')
 
-score.append(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0.9,1,-1)))
+score.append(accuracy_score(y_all[tst7],np.where(model7.model.predict(x_all[tst7])>0,1,-1)))
 print("SVM+convnet | Accuracy with a mix of sets and further splitting: {0:2.4f}".format(score[-1]))
 
 
@@ -594,7 +605,7 @@ loss = model8.model.fit(x_train_indiv[trn8],y_train_indiv[trn8],
 
 model8.model.load_weights(filepath = '.bestmodel.hdf5')
 
-score.append(accuracy_score(dp2.y_test,np.where(model8.model.predict(dp2.x_test)>0.9,1,-1)))
+score.append(accuracy_score(dp2.y_test,np.where(model8.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent testing set: {0:2.4f}".format(score[-1]))
 
 
@@ -621,7 +632,7 @@ loss = model9.model.fit(dp2.x_train[trn9],dp2.y_train[trn9],
 
 model9.model.load_weights(filepath = '.bestmodel.hdf5')
 
-score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0.9,1,-1)))
+score.append(accuracy_score(dp2.y_test,np.where(model9.model.predict(dp2.x_test)>0,1,-1)))
 print("SVM+convnet | Accuracy with independent test set: {0:2.4f}".format(score[-1]))
 
 
