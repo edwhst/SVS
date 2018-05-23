@@ -265,7 +265,7 @@ model1.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history1 = LossHistory()
 
 loss = model1.model.fit([full_set_pairs[trn1,0],full_set_pairs[trn1,1]],full_set_labels[trn1],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history1],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=0),history1],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([full_set_pairs[val1,0],full_set_pairs[val1,1]],full_set_labels[val1]),
@@ -287,7 +287,7 @@ model2.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history2 = LossHistory()
 
 loss = model2.model.fit([pairs_sets[0][trn2,0],pairs_sets[0][trn2,1]],labels_sets[0][trn2],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history2],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=0),history2],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([pairs_sets[0][val2,0],pairs_sets[0][val2,1]],labels_sets[0][val2]),
@@ -326,7 +326,7 @@ model3.model.compile(optimizer='nadam', loss = 'binary_crossentropy', metrics = 
 history3 = LossHistory()
 
 loss = model3.model.fit([x_train[trn3,0],x_train[trn3,1]],y_train[trn3],
-                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=1),history3],
+                    callbacks=[EarlyStopping_byvalue(monitor='val_mean_absolute_error', value=0.05, verbose=0),history3],
                     epochs = 50,
                     batch_size = 100,
                     validation_data = ([x_train[val3,0],x_train[val3,1]],y_train[val3]),
